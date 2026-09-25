@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Akrai - Bolsas de Crochê</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              cream: '#FDFBF7',
+              sand: '#F4EFEA',
+              lightSand: '#EBE3DA',
+              brown: '#5D4037',
+              darkBrown: '#3E2723',
+              berry: '#9C27B0',
+              deepBerry: '#7B1FA2',
+              softPink: '#F8BBD0'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FDFBF7;
+      color: #3E2723;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, select, textarea {
+      user-select: text;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="flex flex-col h-screen overflow-hidden text-brand-darkBrown">
+
+  <!-- HEADER -->
+  <header class="bg-brand-sand border-b border-brand-lightSand px-4 py-3 flex items-center justify-between shrink-0 shadow-sm">
+    <div class="flex items-center gap-2">
+      <img src="logo.png" alt="Akrai" class="h-8 w-auto object-contain rounded" onerror="this.style.display='none'">
+      <h1 class="text-xl font-serif font-bold tracking-wide text-brand-darkBrown">Akrai</h1>
+    </div>
+    <div class="text-xs px-2.5 py-1 bg-brand-lightSand text-brand-brown font-medium rounded-full">
+      Bolsas de Crochê
+    </div>
+  </header>
+
+  <!-- ÁREA PRINCIPAL COM SCROLL -->
+  <main class="flex-1 overflow-y-auto custom-scroll p-4 pb-24">
+
+    <!-- SEÇÃO: BOLSAS & PRECIFICAÇÃO -->
+    <section id="view-bolsas" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold">Catálogo & Precificação</h2>
+        <button onclick="abrirModalBolsa()" class="bg-brand-berry text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 shadow-sm active:scale-95 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Nova Bolsa
+        </button>
+      </div>
+
+      <div id="lista-bolsas" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Itens injetados via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: ESTOQUE DE INSUMOS -->
+    <section id="view-insumos" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-bold">Estoque de Fios e Insumos</h2>
+        <button onclick="abrirModalInsumo()" class="bg-brand-brown text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 shadow-sm active:scale-95 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i> Novo Fio/Item
+        </button>
+      </div>
+
+      <div id="lista-insumos" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <!-- Insumos injetados via JS -->
+      </div>
+    </section>
+
+    <!-- SEÇÃO: FINANCEIRO -->
+    <section id="view-financeiro" class="space-y-4 hidden">
+      <h2 class="text-lg font-bold">Fluxo Financeiro</h2>
+
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="bg-white p-3 rounded-xl border border-brand-lightSand shadow-sm">
+          <span class="text-[11px] text-gray-500 block">Receitas</span>
+          <span id="fin-receitas" class="text-sm font-bold text-green-700">R$ 0,00</span>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-brand-lightSand shadow-sm">
+          <span class="text-[11px] text-gray-500 block">Despesas</span>
+          <span id="fin-despesas" class="text-sm font-bold text-red-600">R$ 0,00</span>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-brand-lightSand shadow-sm">
+          <span class="text-[11px] text-gray-500 block">Saldo</span>
+          <span id="fin-saldo" class="text-sm font-bold text-brand-deepBerry">R$ 0,00</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-brand-lightSand shadow-sm p-4 space-y-3">
+        <h3 class="text-sm font-bold border-b border-brand-sand pb-2">Histórico de Movimentações</h3>
+        <div id="lista-financeiro" class="divide-y divide-brand-sand text-xs max-h-80 overflow-y-auto">
+          <!-- Movimentações injetadas via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-brand-sand border-t border-brand-lightSand flex justify-around items-center py-2 px-4 shadow-lg shrink-0">
+    <button onclick="mudarAba('bolsas')" id="nav-bolsas" class="flex flex-col items-center gap-1 text-brand-berry text-xs font-semibold">
+      <i data-lucide="shopping-bag" class="w-5 h-5"></i> Bolsas
+    </button>
+    <button onclick="mudarAba('insumos')" id="nav-insumos" class="flex flex-col items-center gap-1 text-brand-brown opacity-60 text-xs font-medium">
+      <i data-lucide="layers" class="w-5 h-5"></i> Insumos
+    </button>
+    <button onclick="mudarAba('financeiro')" id="nav-financeiro" class="flex flex-col items-center gap-1 text-brand-brown opacity-60 text-xs font-medium">
+      <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i> Caixa
+    </button>
+  </nav>
+
+  <!-- MODAL: CADASTRAR/EDITAR BOLSA -->
+  <div id="modal-bolsa" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-brand-cream w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-brand-lightSand flex justify-between items-center bg-brand-sand shrink-0">
+        <h3 class="font-bold text-base">Precificar Nova Bolsa</h3>
+        <button onclick="fecharModalBolsa()" class="text-gray-500 hover:text-black">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-bolsa" onsubmit="salvarBolsa(event)" class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
+        <div>
+          <label class="block font-semibold mb-1">Nome do Modelo</label>
+          <input type="text" id="bolsa-nome" required class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white" placeholder="Ex: Bolsa Clutch Pipoca">
+        </div>
+
+        <!-- BOTOES CÂMERA E GALERIA -->
+        <div class="space-y-1.5">
+          <label class="block font-semibold">Foto da Bolsa</label>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="obterFoto('CAMERA', 'preview-bolsa-img', 'bolsa-foto-data')" class="flex-1 bg-brand-berry text-white py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 active:scale-95 transition shadow-sm text-center">
+              <i data-lucide="camera" class="w-4 h-4"></i> Tirar Foto
+            </button>
+            <button type="button" onclick="obterFoto('PHOTOS', 'preview-bolsa-img', 'bolsa-foto-data')" class="flex-1 bg-brand-sand border border-brand-lightSand text-brand-darkBrown py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 active:scale-95 transition text-center">
+              <i data-lucide="image" class="w-4 h-4"></i> Galeria
+            </button>
+          </div>
+          <!-- Fallback invisível para navegadores comuns -->
+          <input type="file" id="fallback-file-bolsa" accept="image/*" class="hidden" onchange="tratarFallbackArquivo(event, 'preview-bolsa-img', 'bolsa-foto-data')">
+          <div class="mt-2 text-center">
+            <img id="preview-bolsa-img" class="h-28 w-auto mx-auto object-cover rounded-lg border border-brand-lightSand hidden shadow-sm" alt="Pré-visualização">
+          </div>
+          <input type="hidden" id="bolsa-foto-data">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Fio Principal</label>
+            <select id="bolsa-fio-id" onchange="recalcularPrecoBolsa()" class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white">
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Peso Utilizado (g)</label>
+            <input type="number" id="bolsa-peso" oninput="recalcularPrecoBolsa()" required class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white" placeholder="350">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Acessórios Extras (R$)</label>
+            <input type="number" step="0.01" id="bolsa-acessorios" oninput="recalcularPrecoBolsa()" class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white" placeholder="Ex: 15.00 (alça, fecho)">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Tempo de Confecção (Horas)</label>
+            <input type="number" step="0.5" id="bolsa-horas" oninput="recalcularPrecoBolsa()" class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white" placeholder="4">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Valor da sua Hora (R$)</label>
+            <input type="number" step="0.5" id="bolsa-valor-hora" value="15" oninput="recalcularPrecoBolsa()" class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Margem de Lucro (%)</label>
+            <input type="number" id="bolsa-margem" value="40" oninput="recalcularPrecoBolsa()" class="w-full p-2.5 rounded-lg border border-brand-lightSand focus:outline-brand-berry bg-white">
+          </div>
+        </div>
+
+        <div class="bg-brand-sand p-3 rounded-xl border border-brand-lightSand space-y-1">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Custo Total de Produção:</span>
+            <span id="resumo-custo-total" class="font-semibold">R$ 0,00</span>
+          </div>
+          <div class="flex justify-between text-sm font-bold text-brand-deepBerry border-t border-brand-lightSand/60 pt-1">
+            <span>Preço Sugerido de Venda:</span>
+            <span id="resumo-preco-sugerido">R$ 0,00</span>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-brand-berry text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-98 transition">
+          Salvar no Catálogo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CADASTRAR/EDITAR INSUMO -->
+  <div id="modal-insumo" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-brand-cream w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-brand-lightSand flex justify-between items-center bg-brand-sand shrink-0">
+        <h3 class="font-bold text-base">Novo Fio ou Insumo</h3>
+        <button onclick="fecharModalInsumo()" class="text-gray-500 hover:text-black">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <form id="form-insumo" onsubmit="salvarInsumo(event)" class="p-4 space-y-4 overflow-y-auto custom-scroll text-xs">
+        <div>
+          <label class="block font-semibold mb-1">Nome / Marca do Fio</label>
+          <input type="text" id="insumo-nome" required class="w-full p-2.5 rounded-lg border border-brand-lightSand bg-white" placeholder="Ex: Fio Náutico 5mm - Círculo">
+        </div>
+
+        <!-- BOTOES CÂMERA E GALERIA -->
+        <div class="space-y-1.5">
+          <label class="block font-semibold">Foto do Fio / Cor</label>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="obterFoto('CAMERA', 'preview-insumo-img', 'insumo-foto-data')" class="flex-1 bg-brand-brown text-white py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 active:scale-95 transition shadow-sm text-center">
+              <i data-lucide="camera" class="w-4 h-4"></i> Tirar Foto
+            </button>
+            <button type="button" onclick="obterFoto('PHOTOS', 'preview-insumo-img', 'insumo-foto-data')" class="flex-1 bg-brand-sand border border-brand-lightSand text-brand-darkBrown py-2 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 active:scale-95 transition text-center">
+              <i data-lucide="image" class="w-4 h-4"></i> Galeria
+            </button>
+          </div>
+          <!-- Fallback invisível -->
+          <input type="file" id="fallback-file-insumo" accept="image/*" class="hidden" onchange="tratarFallbackArquivo(event, 'preview-insumo-img', 'insumo-foto-data')">
+          <div class="mt-2 text-center">
+            <img id="preview-insumo-img" class="h-24 w-auto mx-auto object-cover rounded-lg border border-brand-lightSand hidden shadow-sm" alt="Pré-visualização">
+          </div>
+          <input type="hidden" id="insumo-foto-data">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block font-semibold mb-1">Preço Pago no Rolo (R$)</label>
+            <input type="number" step="0.01" id="insumo-preco" required class="w-full p-2.5 rounded-lg border border-brand-lightSand bg-white" placeholder="Ex: 38.00">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1">Peso Total do Rolo (g)</label>
+            <input type="number" id="insumo-peso" required class="w-full p-2.5 rounded-lg border border-brand-lightSand bg-white" placeholder="Ex: 500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1">Quantidade em Estoque (Unidades/Rolos)</label>
+          <input type="number" id="insumo-estoque" value="1" required class="w-full p-2.5 rounded-lg border border-brand-lightSand bg-white">
+        </div>
+
+        <button type="submit" class="w-full bg-brand-brown text-white py-3 rounded-xl font-bold text-sm shadow-md active:scale-98 transition">
+          Cadastrar Insumo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let db;
+    let insumosCache = [];
+    let bolsasCache = [];
+    let financeiroCache = [];
+
+    // INTEGRAÇÃO COM A CÂMERA NATIVA DO CAPACITOR
+    async function obterFoto(origem, previewImgId, hiddenInputId) {
+      try {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera) {
+          const Camera = window.Capacitor.Plugins.Camera;
+          const image = await Camera.getPhoto({
+            quality: 75,
+            allowEditing: false,
+            resultType: 'dataUrl',
+            source: origem === 'CAMERA' ? 'CAMERA' : 'PHOTOS',
+            width: 800
+          });
+
+          const base64Data = image.dataUrl;
+          const previewEl = document.getElementById(previewImgId);
+          previewEl.src = base64Data;
+          previewEl.classList.remove('hidden');
+          document.getElementById(hiddenInputId).value = base64Data;
+        } else {
+          // Fallback para navegador comum
+          const fallbackInput = previewImgId.includes('bolsa') 
+            ? document.getElementById('fallback-file-bolsa')
+            : document.getElementById('fallback-file-insumo');
+          fallbackInput.click();
+        }
+      } catch (err) {
+        console.warn("Ação de foto cancelada ou erro:", err);
+      }
+    }
+
+    function tratarFallbackArquivo(event, previewImgId, hiddenInputId) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDimension = 800;
+
+          if (width > height && width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const base64Comprimido = canvas.toDataURL('image/jpeg', 0.75);
+          const previewEl = document.getElementById(previewImgId);
+          previewEl.src = base64Comprimido;
+          previewEl.classList.remove('hidden');
+          document.getElementById(hiddenInputId).value = base64Comprimido;
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // INDEXEDDB
+    function initDB() {
+      const request = indexedDB.open('AkraiDB', 1);
+
+      request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains('insumos')) {
+          db.createObjectStore('insumos', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('bolsas')) {
+          db.createObjectStore('bolsas', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('financeiro')) {
+          db.createObjectStore('financeiro', { keyPath: 'id', autoIncrement: true });
+        }
+      };
+
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        carregarTudo();
+      };
+
+      request.onerror = () => console.error("Erro ao abrir IndexedDB");
+    }
+
+    // NAVEGAÇÃO
+    function mudarAba(aba) {
+      ['bolsas', 'insumos', 'financeiro'].forEach(a => {
+        document.getElementById(`view-${a}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-${a}`);
+        btn.classList.add('opacity-60');
+        btn.classList.remove('text-brand-berry');
+      });
+
+      document.getElementById(`view-${aba}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${aba}`);
+      activeBtn.classList.remove('opacity-60');
+      activeBtn.classList.add('text-brand-berry');
+      lucide.createIcons();
+    }
+
+    function carregarTudo() {
+      carregarInsumos();
+      carregarBolsas();
+      carregarFinanceiro();
+    }
+
+    // INSUMOS
+    function carregarInsumos() {
+      const tx = db.transaction('insumos', 'readonly');
+      tx.objectStore('insumos').getAll().onsuccess = (e) => {
+        insumosCache = e.target.result;
+        renderizarInsumos();
+        popularSelectInsumos();
+      };
+    }
+
+    function renderizarInsumos() {
+      const container = document.getElementById('lista-insumos');
+      container.innerHTML = '';
+
+      if (insumosCache.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-500 italic col-span-2 text-center py-6">Nenhum fio cadastrado ainda.</p>`;
+        return;
+      }
+
+      insumosCache.forEach(item => {
+        const precoPorGrama = (item.preco / item.peso).toFixed(3);
+        const card = document.createElement('div');
+        card.className = "bg-white p-3 rounded-xl border border-brand-lightSand shadow-sm flex items-center gap-3";
+        card.innerHTML = `
+          ${item.foto ? `<img src="${item.foto}" class="w-14 h-14 object-cover rounded-lg shrink-0 border border-brand-sand">` : `<div class="w-14 h-14 bg-brand-sand rounded-lg shrink-0 flex items-center justify-center text-gray-400"><i data-lucide="layers" class="w-6 h-6"></i></div>`}
+          <div class="flex-1 min-w-0">
+            <h4 class="font-bold text-xs truncate">${item.nome}</h4>
+            <p class="text-[11px] text-gray-500">Rolo: R$ ${item.preco.toFixed(2)} (${item.peso}g)</p>
+            <p class="text-[11px] text-brand-brown font-semibold">Custo: R$ ${precoPorGrama}/g | Qtd: ${item.estoque}</p>
+          </div>
+          <button onclick="excluirItem('insumos', ${item.id})" class="text-gray-400 hover:text-red-500 p-1">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function popularSelectInsumos() {
+      const select = document.getElementById('bolsa-fio-id');
+      select.innerHTML = '<option value="">Selecione o fio...</option>';
+      insumosCache.forEach(i => {
+        select.innerHTML += `<option value="${i.id}">${i.nome} (R$ ${(i.preco/i.peso).toFixed(3)}/g)</option>`;
+      });
+    }
+
+    function salvarInsumo(e) {
+      e.preventDefault();
+      const novo = {
+        nome: document.getElementById('insumo-nome').value,
+        foto: document.getElementById('insumo-foto-data').value,
+        preco: parseFloat(document.getElementById('insumo-preco').value),
+        peso: parseFloat(document.getElementById('insumo-peso').value),
+        estoque: parseInt(document.getElementById('insumo-estoque').value)
+      };
+
+      const tx = db.transaction(['insumos', 'financeiro'], 'readwrite');
+      tx.objectStore('insumos').add(novo);
+
+      tx.objectStore('financeiro').add({
+        descricao: `Compra Fio: ${novo.nome}`,
+        tipo: 'despesa',
+        valor: novo.preco * novo.estoque,
+        data: new Date().toLocaleDateString('pt-BR')
+      });
+
+      tx.oncomplete = () => {
+        fecharModalInsumo();
+        carregarTudo();
+      };
+    }
+
+    // BOLSAS
+    function recalcularPrecoBolsa() {
+      const fioId = parseInt(document.getElementById('bolsa-fio-id').value);
+      const peso = parseFloat(document.getElementById('bolsa-peso').value) || 0;
+      const acessorios = parseFloat(document.getElementById('bolsa-acessorios').value) || 0;
+      const horas = parseFloat(document.getElementById('bolsa-horas').value) || 0;
+      const valorHora = parseFloat(document.getElementById('bolsa-valor-hora').value) || 0;
+      const margem = parseFloat(document.getElementById('bolsa-margem').value) || 0;
+
+      let custoFio = 0;
+      const fio = insumosCache.find(i => i.id === fioId);
+      if (fio) {
+        custoFio = (fio.preco / fio.peso) * peso;
+      }
+
+      const custoMaoDeObra = horas * valorHora;
+      const custoTotal = custoFio + acessorios + custoMaoDeObra;
+      const precoSugerido = custoTotal * (1 + (margem / 100));
+
+      document.getElementById('resumo-custo-total').innerText = `R$ ${custoTotal.toFixed(2)}`;
+      document.getElementById('resumo-preco-sugerido').innerText = `R$ ${precoSugerido.toFixed(2)}`;
+
+      return { custoTotal, precoSugerido };
+    }
+
+    function salvarBolsa(e) {
+      e.preventDefault();
+      const calc = recalcularPrecoBolsa();
+
+      const novaBolsa = {
+        nome: document.getElementById('bolsa-nome').value,
+        foto: document.getElementById('bolsa-foto-data').value,
+        fioId: parseInt(document.getElementById('bolsa-fio-id').value),
+        peso: parseFloat(document.getElementById('bolsa-peso').value),
+        acessorios: parseFloat(document.getElementById('bolsa-acessorios').value) || 0,
+        horas: parseFloat(document.getElementById('bolsa-horas').value),
+        custoTotal: calc.custoTotal,
+        precoVenda: calc.precoSugerido,
+        status: 'Disponível',
+        data: new Date().toLocaleDateString('pt-BR')
+      };
+
+      const tx = db.transaction('bolsas', 'readwrite');
+      tx.objectStore('bolsas').add(novaBolsa);
+
+      tx.oncomplete = () => {
+        fecharModalBolsa();
+        carregarBolsas();
+      };
+    }
+
+    function carregarBolsas() {
+      const tx = db.transaction('bolsas', 'readonly');
+      tx.objectStore('bolsas').getAll().onsuccess = (e) => {
+        bolsasCache = e.target.result;
+        renderizarBolsas();
+      };
+    }
+
+    function renderizarBolsas() {
+      const container = document.getElementById('lista-bolsas');
+      container.innerHTML = '';
+
+      if (bolsasCache.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-500 italic col-span-2 text-center py-6">Nenhuma bolsa precificada ainda.</p>`;
+        return;
+      }
+
+      bolsasCache.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-xl border border-brand-lightSand overflow-hidden shadow-sm flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            ${item.foto ? `<img src="${item.foto}" class="w-full h-36 object-cover">` : `<div class="w-full h-32 bg-brand-sand flex items-center justify-center text-gray-400"><i data-lucide="shopping-bag" class="w-8 h-8"></i></div>`}
+            <div class="p-3">
+              <div class="flex justify-between items-start">
+                <h4 class="font-bold text-sm">${item.nome}</h4>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full ${item.status === 'Vendida' ? 'bg-gray-100 text-gray-600' : 'bg-green-100 text-green-700'}">${item.status}</span>
+              </div>
+              <p class="text-[11px] text-gray-500 mt-1">Custo: R$ ${item.custoTotal.toFixed(2)}</p>
+              <p class="text-base font-bold text-brand-deepBerry mt-0.5">R$ ${item.precoVenda.toFixed(2)}</p>
+            </div>
+          </div>
+          <div class="p-3 pt-0 flex gap-2">
+            ${item.status !== 'Vendida' ? `
+              <button onclick="venderBolsa(${item.id})" class="flex-1 bg-green-700 text-white py-1.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 active:scale-95 transition">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i> Vender
+              </button>
+            ` : ''}
+            <button onclick="compartilharWhatsApp(${item.id})" class="bg-[#25D366] text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 active:scale-95 transition">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            </button>
+            <button onclick="excluirItem('bolsas', ${item.id})" class="text-gray-400 hover:text-red-500 p-1.5">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function venderBolsa(id) {
+      const bolsa = bolsasCache.find(b => b.id === id);
+      if (!bolsa) return;
+
+      const tx = db.transaction(['bolsas', 'financeiro'], 'readwrite');
+      bolsa.status = 'Vendida';
+      tx.objectStore('bolsas').put(bolsa);
+
+      tx.objectStore('financeiro').add({
+        descricao: `Venda: ${bolsa.nome}`,
+        tipo: 'receita',
+        valor: bolsa.precoVenda,
+        data: new Date().toLocaleDateString('pt-BR')
+      });
+
+      tx.oncomplete = () => carregarTudo();
+    }
+
+   async function compartilharWhatsApp(id) {
+  const bolsa = bolsasCache.find(b => b.id === id);
+  if (!bolsa) return;
+
+  const texto = `🌸 *Akrai Bolsas de Crochê*\n\nModelo: *${bolsa.nome}*\nValor: *R$ ${bolsa.precoVenda.toFixed(2)}*\nPeça artesanal exclusiva e feita à mão com muito carinho!\n\n✨ *Cuidados:* Lavar à mão com sabão neutro e secar na horizontal.`;
+
+  // Se estiver rodando no celular via Capacitor com foto salva
+  if (window.Capacitor?.isNativePlatform() && bolsa.foto && window.Capacitor.Plugins.Share && window.Capacitor.Plugins.Filesystem) {
+    try {
+      const { Filesystem, Directory } = window.Capacitor.Plugins.Filesystem;
+      const { Share } = window.Capacitor.Plugins.Share;
+
+      // 1. Salva a imagem base64 temporariamente no armazenamento do app
+      const fileName = `bolsa_${bolsa.id}_${Date.now()}.jpg`;
+      const base64Data = bolsa.foto.replace(/^data:image\/[a-z]+;base64,/, "");
+
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64Data,
+        directory: Directory.Cache
+      });
+
+      // 2. Dispara o menu nativo de compartilhamento com a imagem e texto
+      await Share.share({
+        title: bolsa.nome,
+        text: texto,
+        url: savedFile.uri,
+        dialogTitle: 'Compartilhar no WhatsApp'
+      });
+      return;
+    } catch (err) {
+      console.warn("Falha no compartilhamento nativo com foto:", err);
+    }
+  }
+
+  // Fallback caso não tenha foto cadastrada ou rode no navegador
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+  window.open(url, '_blank');
+}
+    }
+
+    // FINANCEIRO
+    function carregarFinanceiro() {
+      const tx = db.transaction('financeiro', 'readonly');
+      tx.objectStore('financeiro').getAll().onsuccess = (e) => {
+        financeiroCache = e.target.result;
+        renderizarFinanceiro();
+      };
+    }
+
+    function renderizarFinanceiro() {
+      let receitas = 0;
+      let despesas = 0;
+      const container = document.getElementById('lista-financeiro');
+      container.innerHTML = '';
+
+      financeiroCache.forEach(item => {
+        if (item.tipo === 'receita') receitas += item.valor;
+        if (item.tipo === 'despesa') despesas += item.valor;
+
+        const row = document.createElement('div');
+        row.className = "py-2 flex justify-between items-center";
+        row.innerHTML = `
+          <div>
+            <p class="font-medium">${item.descricao}</p>
+            <span class="text-[10px] text-gray-400">${item.data}</span>
+          </div>
+          <span class="font-bold ${item.tipo === 'receita' ? 'text-green-700' : 'text-red-600'}">
+            ${item.tipo === 'receita' ? '+' : '-'} R$ ${item.valor.toFixed(2)}
+          </span>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('fin-receitas').innerText = `R$ ${receitas.toFixed(2)}`;
+      document.getElementById('fin-despesas').innerText = `R$ ${despesas.toFixed(2)}`;
+      const saldo = receitas - despesas;
+      const saldoEl = document.getElementById('fin-saldo');
+      saldoEl.innerText = `R$ ${saldo.toFixed(2)}`;
+      saldoEl.className = `text-sm font-bold ${saldo >= 0 ? 'text-brand-deepBerry' : 'text-red-600'}`;
+    }
+
+    function excluirItem(storeName, id) {
+      if (!confirm("Deseja realmente remover este item?")) return;
+      const tx = db.transaction(storeName, 'readwrite');
+      tx.objectStore(storeName).delete(id);
+      tx.oncomplete = () => carregarTudo();
+    }
+
+    // CONTROLES DE MODAIS
+    function abrirModalBolsa() {
+      document.getElementById('form-bolsa').reset();
+      document.getElementById('preview-bolsa-img').classList.add('hidden');
+      document.getElementById('bolsa-foto-data').value = '';
+      recalcularPrecoBolsa();
+      document.getElementById('modal-bolsa').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function fecharModalBolsa() {
+      document.getElementById('modal-bolsa').classList.add('hidden');
+    }
+
+    function abrirModalInsumo() {
+      document.getElementById('form-insumo').reset();
+      document.getElementById('preview-insumo-img').classList.add('hidden');
+      document.getElementById('insumo-foto-data').value = '';
+      document.getElementById('modal-insumo').classList.remove('hidden');
+      lucide.createIcons();
+    }
+    function fecharModalInsumo() {
+      document.getElementById('modal-insumo').classList.add('hidden');
+    }
+
+    window.onload = () => {
+      initDB();
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>

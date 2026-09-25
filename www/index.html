@@ -1,0 +1,1739 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akrai - Ateliê de Bolsas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #EFECE6;
+      --card-bg: #FAF9F6;
+      --text-brown: #4A3525;
+      --accent-berry: #9E2A47;
+      --accent-hover: #7E1F36;
+      --cord-gold: #C5A880;
+      --input-border: #D8CEBE;
+      --light-berry: #F7EBF0;
+      --green-income: #2E7D32;
+      --red-expense: #C62828;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-brown);
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      background: var(--card-bg);
+      border: 1px solid var(--cord-gold);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(74, 53, 37, 0.12);
+      max-width: 440px;
+      width: 100%;
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .brand-logo {
+      max-width: 180px;
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border-radius: 8px;
+    }
+
+    #lock-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 0;
+      text-align: center;
+    }
+
+    #lock-screen p {
+      font-size: 13px;
+      margin-bottom: 16px;
+      color: #7A695C;
+    }
+
+    #lock-screen input {
+      text-align: center;
+      letter-spacing: 4px;
+      font-size: 18px;
+      max-width: 220px;
+      margin-bottom: 12px;
+    }
+
+    .tab-bar {
+      display: flex;
+      background: #E8E2D8;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+      gap: 3px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 8px 2px;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      background: transparent;
+      color: var(--text-brown);
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: #FFFFFF;
+      color: var(--accent-berry);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .form-group { margin-bottom: 12px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-brown);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--input-border);
+      border-radius: 8px;
+      background: #FFFFFF;
+      font-size: 13.5px;
+      color: var(--text-brown);
+      outline: none;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus { border-color: var(--accent-berry); }
+
+    .row { display: flex; gap: 10px; }
+    .row .form-group { flex: 1; }
+
+    .photo-upload-box {
+      border: 2px dashed var(--cord-gold);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      background: #FAF7F2;
+      margin-bottom: 14px;
+      min-height: 105px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .photo-preview {
+      width: 100%;
+      max-height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .photo-placeholder { font-size: 12px; color: #7A695C; }
+
+    .photo-btn-group {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .btn-photo-action {
+      flex: 1;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--cord-gold);
+      background: #FFFFFF;
+      color: var(--text-brown);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-photo-action.camera {
+      background: var(--accent-berry);
+      color: #FFFFFF;
+      border-color: var(--accent-berry);
+    }
+
+    .btn-photo-action:active { transform: scale(0.97); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 12px;
+      background-color: var(--accent-berry);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover { background-color: var(--accent-hover); }
+
+    .btn-secondary {
+      background-color: var(--cord-gold);
+      color: #FFFFFF;
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      border: 1px solid var(--red-expense);
+      color: var(--red-expense);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-danger-outline:hover { background: #FDE8E8; }
+
+    .btn-outline-small {
+      background: #FAF7F2;
+      border: 1px solid var(--cord-gold);
+      color: var(--accent-berry);
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .section-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      margin: 16px 0 10px;
+      color: var(--accent-berry);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sync-status {
+      font-size: 10px;
+      color: #2E7D32;
+      font-weight: 600;
+      text-transform: none;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .item-card {
+      display: flex;
+      flex-direction: column;
+      background: #FFFFFF;
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .item-card.vendido {
+      opacity: 0.75;
+      border-style: dashed;
+      background: #FAFAF7;
+    }
+
+    .card-header-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .item-thumb {
+      width: 58px;
+      height: 58px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #EFECE6;
+      flex-shrink: 0;
+    }
+
+    .item-info { flex: 1; min-width: 0; }
+    .item-info h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .item-info p { font-size: 12px; color: #7A695C; }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      border-top: 1px dashed var(--input-border);
+      padding-top: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 7px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .btn-action-sell { background: #E8F5E9; color: var(--green-income); }
+    .btn-action-wpp { background: #E7F9EE; color: #1E7E34; }
+    .btn-action-del { background: #FDE8E8; color: var(--red-expense); flex: 0 0 30px; }
+
+    .badge-vendida {
+      display: inline-block;
+      font-size: 10px;
+      background: var(--green-income);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .result-box {
+      margin-top: 14px;
+      padding: 14px;
+      background: var(--light-berry);
+      border: 1px solid rgba(158, 42, 71, 0.25);
+      border-radius: 10px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin: 4px 0;
+    }
+
+    .result-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1.5px solid var(--cord-gold);
+      padding-top: 8px;
+      margin-top: 8px;
+      font-weight: 700;
+      color: var(--accent-berry);
+      font-size: 15px;
+    }
+
+    .fin-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .fin-card {
+      background: #FFFFFF;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .fin-card span { font-size: 11px; font-weight: 600; color: #7A695C; }
+    .fin-card strong { display: block; font-size: 15px; margin-top: 4px; }
+
+    .fin-balance {
+      grid-column: span 2;
+      background: #FAF7F2;
+      border-color: var(--cord-gold);
+    }
+
+    .filter-card {
+      background: #FAF7F2;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    .fin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .fin-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFFFFF;
+      border: 1px solid var(--input-border);
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 12.5px;
+    }
+
+    .fin-item-title { font-weight: 600; }
+    .fin-item-date { font-size: 10.5px; color: #8C7B6D; }
+
+    .sub-section-box {
+      background: #FAF7F2;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+    }
+
+    .dynamic-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-box {
+      background: #FFFFFF;
+      border-radius: 14px;
+      max-width: 380px;
+      width: 100%;
+      padding: 20px;
+      border: 1px solid var(--cord-gold);
+    }
+
+    .modal-box h3 {
+      font-size: 15px;
+      color: var(--accent-berry);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #modalVisualizarExtrato .modal-box {
+      max-width: 420px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #conteudoExtratoScroll {
+      flex: 1;
+      overflow-y: auto;
+      margin: 10px 0;
+      padding: 10px;
+      background: #FAF7F2;
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+  <div class="brand-header">
+    <img src="logo.png" alt="Akrai Bolsas de Crochê" class="brand-logo" onerror="this.outerHTML='<h1 style=\'font-family:Cinzel;color:var(--text-brown);text-align:center;\'>Akrai</h1>'">
+  </div>
+
+  <div id="lock-screen">
+    <p>Acesso Restrito</p>
+    <input type="password" id="inputSenhaLoja" placeholder="••••••" maxlength="12">
+    <button class="btn-primary" style="max-width: 220px;" onclick="verificarSenha()">Entrar</button>
+  </div>
+
+  <div id="app-content" style="display:none;">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('produtos')">📦 Inventário</button>
+      <button class="tab-btn" onclick="switchTab('precificar')">➕ Precificar</button>
+      <button class="tab-btn" onclick="switchTab('catalogo')">👜 Catálogo</button>
+      <button class="tab-btn" onclick="switchTab('financeiro')">💵 Financeiro</button>
+    </div>
+
+    <div id="tab-produtos" class="tab-content active">
+      <div class="photo-upload-box">
+        <img id="prevFotoInsumo" class="photo-preview" alt="Prévia">
+        <div id="phFotoInsumo" class="photo-placeholder">Imagem do insumo</div>
+        <div class="photo-btn-group">
+          <button type="button" class="btn-photo-action camera" onclick="capturarFoto('CAMERA', 'prevFotoInsumo', 'phFotoInsumo', 'insumo')">📷 Câmera</button>
+          <button type="button" class="btn-photo-action" onclick="capturarFoto('PHOTOS', 'prevFotoInsumo', 'phFotoInsumo', 'insumo')">🖼️ Galeria</button>
+        </div>
+        <input type="file" id="inputFotoInsumo" accept="image/*" style="display:none" onchange="previewImage(event, 'prevFotoInsumo', 'phFotoInsumo', 'insumo')">
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Material</label>
+        <select id="prodTipoMaterial" onchange="alternarTipoInsumo()">
+          <option value="fio">Fio / Linha (por gramas)</option>
+          <option value="acessorio">Acessório (Unidade)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Nome do Item</label>
+        <input type="text" id="prodNome">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label id="lblPrecoInsumo">Preço Pago (R$)</label>
+          <input type="number" id="prodPrecoTotal" step="0.01">
+        </div>
+        <div class="form-group" id="boxPesoInsumo">
+          <label>Peso (g)</label>
+          <input type="number" id="prodQtdTotal">
+        </div>
+        <div class="form-group" id="boxQtdAcessorio" style="display:none;">
+          <label>Quantidade (un)</label>
+          <input type="number" id="prodQtdAcessorio" value="1" min="1">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="salvarInsumo()">Salvar no Inventário</button>
+
+      <div class="section-title">
+        <span>Estoque Disponível</span>
+        <span class="sync-status" id="syncStatus">● Conectado</span>
+      </div>
+
+      <button type="button" class="btn-secondary" style="margin-bottom: 12px; background-color: var(--cord-gold);" onclick="forcarSincronizacaoProfunda('insumos')">Sincronizar Dados Locais</button>
+
+      <div class="card-list" id="listaProdutos"></div>
+    </div>
+
+    <div id="tab-precificar" class="tab-content">
+      <div class="photo-upload-box">
+        <img id="prevFotoBolsa" class="photo-preview" alt="Prévia">
+        <div id="phFotoBolsa" class="photo-placeholder">Imagem da bolsa</div>
+        <div class="photo-btn-group">
+          <button type="button" class="btn-photo-action camera" onclick="capturarFoto('CAMERA', 'prevFotoBolsa', 'phFotoBolsa', 'bolsa')">📷 Câmera</button>
+          <button type="button" class="btn-photo-action" onclick="capturarFoto('PHOTOS', 'prevFotoBolsa', 'phFotoBolsa', 'bolsa')">🖼️ Galeria</button>
+        </div>
+        <input type="file" id="inputFotoBolsa" accept="image/*" style="display:none" onchange="previewImage(event, 'prevFotoBolsa', 'phFotoBolsa', 'bolsa')">
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Modelo</label>
+          <input type="text" id="bolsaNome">
+        </div>
+        <div class="form-group">
+          <label>Produção</label>
+          <input type="text" id="bolsaArtesa">
+        </div>
+      </div>
+
+      <div class="sub-section-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="margin-bottom:0;">Fios</label>
+          <button type="button" class="btn-outline-small" onclick="adicionarLinhaFio()">+ Adicionar Fio</button>
+        </div>
+        <div id="containerLinhasFios"></div>
+      </div>
+
+      <div class="sub-section-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="margin-bottom:0;">Acessórios</label>
+          <button type="button" class="btn-outline-small" onclick="adicionarLinhaAcessorio()">+ Adicionar Acessório</button>
+        </div>
+        <div id="containerLinhasAcessorios"></div>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label>Horas Gastas</label>
+          <input type="number" id="bolsaHoras" step="0.5" oninput="calcularBolsa()">
+        </div>
+        <div class="form-group">
+          <label>Valor Hora (R$)</label>
+          <input type="number" id="bolsaValorHora" value="20.00" oninput="calcularBolsa()">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Margem (%)</label>
+        <input type="number" id="bolsaMargem" value="35" oninput="calcularBolsa()">
+      </div>
+
+      <button class="btn-primary" onclick="calcularBolsa()">Calcular Preço</button>
+
+      <div class="result-box" id="resultadoBolsa" style="display:none;">
+        <div class="result-row"><span>Custo Fios:</span><strong id="outFio">R$ 0,00</strong></div>
+        <div class="result-row"><span>Custo Acessórios:</span><strong id="outAcessorios">R$ 0,00</strong></div>
+        <div class="result-row"><span>Mão de Obra:</span><strong id="outMao">R$ 0,00</strong></div>
+        <div class="result-row"><span>Custo Base:</span><strong id="outCustoBase">R$ 0,00</strong></div>
+        <div class="result-total">
+          <span>Preço Sugerido:</span>
+          <span id="outPrecoVenda">R$ 0,00</span>
+        </div>
+        <button class="btn-secondary" onclick="salvarBolsaNoCatalogo()">Salvar no Catálogo</button>
+      </div>
+    </div>
+
+    <div id="tab-catalogo" class="tab-content">
+      <div class="section-title" style="margin-top:0;">
+        <span>Catálogo de Modelos</span>
+        <span class="sync-status">● Conectado</span>
+      </div>
+
+      <button type="button" class="btn-secondary" style="margin-bottom: 12px; background-color: var(--cord-gold);" onclick="forcarSincronizacaoProfunda('bolsas')">Sincronizar Modelos Locais</button>
+
+      <div class="card-list" id="listaBolsas"></div>
+    </div>
+
+    <div id="tab-financeiro" class="tab-content">
+      <div class="fin-cards">
+        <div class="fin-card">
+          <span>Receitas</span>
+          <strong style="color: var(--green-income);" id="finTotalEntradas">R$ 0,00</strong>
+        </div>
+        <div class="fin-card">
+          <span>Despesas</span>
+          <strong style="color: var(--red-expense);" id="finTotalSaidas">R$ 0,00</strong>
+        </div>
+        <div class="fin-card fin-balance">
+          <span>Saldo em Caixa</span>
+          <strong id="finSaldoLiquido">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <div class="filter-card">
+        <label>Filtrar Período</label>
+        <div class="row" style="margin-bottom:8px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="date" id="filtroDataInicio" style="font-size:12px; padding:6px 8px;">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <input type="date" id="filtroDataFim" style="font-size:12px; padding:6px 8px;">
+          </div>
+        </div>
+        <div class="row" style="gap:5px;">
+          <button class="btn-photo-action" style="font-size:11px; padding:7px 4px;" onclick="carregarFinanceiro()">Filtrar</button>
+          <button class="btn-photo-action" style="font-size:11px; padding:7px 4px; background:#ECE7DF;" onclick="limparFiltroFinanceiro()">Limpar</button>
+          <button class="btn-photo-action camera" style="font-size:11px; padding:7px 4px;" onclick="abrirModalExtrato()">📄 Gerar PDF</button>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <span>Movimentações</span>
+        <button type="button" class="btn-outline-small" onclick="forcarSincronizacaoProfunda('financeiro')">Sincronizar Caixa</button>
+      </div>
+      <div class="fin-list" id="listaFinanceiro"></div>
+
+      <button class="btn-danger-outline" onclick="resetarFinanceiro()">Resetar Caixa</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalVenda" onclick="fecharModalVenda(event)">
+  <div class="modal-box">
+    <h3>
+      Registrar Saída de Peça
+      <span style="cursor:pointer;font-size:18px;" onclick="document.getElementById('modalVenda').style.display='none'">✕</span>
+    </h3>
+    <p style="font-size:12.5px; margin-bottom:12px;" id="modalVendaDesc"></p>
+
+    <div class="form-group">
+      <label>Responsável</label>
+      <input type="text" id="vendaVendedora">
+    </div>
+
+    <div class="form-group">
+      <label>Valor Efetivo (R$)</label>
+      <input type="number" id="vendaValorEfetivo" step="0.01">
+    </div>
+
+    <button class="btn-primary" onclick="confirmarVendaBolsa()">Confirmar</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalVisualizarExtrato" onclick="fecharModalExtrato(event)">
+  <div class="modal-box">
+    <h3>
+      Relatório Contábil
+      <span style="cursor:pointer;font-size:18px;" onclick="document.getElementById('modalVisualizarExtrato').style.display='none'">✕</span>
+    </h3>
+    <p style="font-size:11px; color:#7A695C;" id="extratoModalPeriodo"></p>
+    
+    <div id="conteudoExtratoScroll"></div>
+
+    <div class="row" style="margin-top:10px; gap:6px;">
+      <button class="btn-photo-action camera" onclick="gerarECompartilharPDF()">📥 Baixar PDF</button>
+      <button class="btn-photo-action" onclick="document.getElementById('modalVisualizarExtrato').style.display='none'">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const env = window.APP_CONFIG || {};
+  const DEFAULT_URL = "https://SEU-PROJETO.supabase.co";
+  const DEFAULT_KEY = "SUA-CHAVE-ANON-AQUI";
+  
+  const sbClient = supabase.createClient(env.SUPABASE_URL || DEFAULT_URL, env.SUPABASE_KEY || DEFAULT_KEY);
+  const AUTH_KEY = env.STORE_PASS || "123456";
+
+  let db;
+  let insumosCache = [];
+  let tempFotoInsumo = "";
+  let tempFotoBolsa = "";
+  let ultimoCalculo = null;
+  let bolsaParaVender = null;
+  let extratoDadosPDF = { lancamentos: [], entradas: 0, saidas: 0, saldo: 0, periodo: "" };
+
+  const SVG_DEFAULT_ASSET = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58' viewBox='0 0 24 24' fill='none' stroke='%23c5a880' stroke-width='2'%3E%3Cpath d='M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z'/%3E%3C/svg%3E";
+  const SVG_DEFAULT_PRODUCT = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58' viewBox='0 0 24 24' fill='none' stroke='%239e2a47' stroke-width='2'%3E%3Cpath d='M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z'/%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M16 10a4 4 0 0 1-8 0'/%3E%3C/svg%3E";
+
+  function verificarSessao() {
+    if (localStorage.getItem("akrai_autenticado") === "true") {
+      liberarAcesso();
+    }
+  }
+
+  function verificarSenha() {
+    const input = (document.getElementById("inputSenhaLoja").value || "").trim();
+    if (input === AUTH_KEY) {
+      localStorage.setItem("akrai_autenticado", "true");
+      liberarAcesso();
+    } else {
+      alert("Acesso negado.");
+    }
+  }
+
+  function liberarAcesso() {
+    document.getElementById("lock-screen").style.display = "none";
+    document.getElementById("app-content").style.display = "block";
+    iniciarApp();
+    carregarInsumos();
+    carregarBolsas();
+    carregarFinanceiro();
+  }
+
+  function iniciarApp() {
+    const request = indexedDB.open("AkraiDB", 12);
+    request.onupgradeneeded = function(e) {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("insumos")) db.createObjectStore("insumos", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("bolsas")) db.createObjectStore("bolsas", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("financeiro")) db.createObjectStore("financeiro", { keyPath: "id" });
+    };
+
+    request.onsuccess = function(e) {
+      db = e.target.result;
+    };
+  }
+
+  function getHojeFormatadoIso() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  function converterParaIso(dataStr) {
+    if (!dataStr) return "";
+    if (dataStr.includes("-")) return dataStr;
+    if (dataStr.includes("/")) {
+      const p = dataStr.split("/");
+      if (p.length === 3) return `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+    }
+    return "";
+  }
+
+  function isItemAcessorio(item) {
+    if (!item) return false;
+    return item.tipo === 'acessorio' || item.prodComposicao === 'acessorio' || item.composicao === 'acessorio';
+  }
+
+  function getPrecoItem(item) {
+    if (!item) return 0;
+    const p = item.precoTotal !== undefined ? item.precoTotal : (item.precototal !== undefined ? item.precototal : item.preco);
+    return parseFloat(p) || 0;
+  }
+
+  function switchTab(aba) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    if (aba === 'produtos') {
+      document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+      document.getElementById('tab-produtos').classList.add('active');
+      carregarInsumos();
+    } else if (aba === 'precificar') {
+      document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+      document.getElementById('tab-precificar').classList.add('active');
+      carregarInsumos(() => {
+        if (document.querySelectorAll('.item-linha-fio').length === 0) adicionarLinhaFio();
+      });
+    } else if (aba === 'catalogo') {
+      document.querySelector('.tab-btn:nth-child(3)').classList.add('active');
+      document.getElementById('tab-catalogo').classList.add('active');
+      carregarBolsas();
+    } else {
+      document.querySelector('.tab-btn:nth-child(4)').classList.add('active');
+      document.getElementById('tab-financeiro').classList.add('active');
+      carregarFinanceiro();
+    }
+  }
+
+  async function capturarFoto(origem, imgId, phId, target) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Camera) {
+      try {
+        const image = await window.Capacitor.Plugins.Camera.getPhoto({
+          quality: 80,
+          allowEditing: false,
+          resultType: 'dataUrl',
+          source: origem === 'CAMERA' ? 'CAMERA' : 'PHOTOS',
+          width: 800
+        });
+
+        let base64 = image.dataUrl;
+        if (!base64.startsWith('data:image')) {
+          base64 = `data:image/jpeg;base64,${image.base64String || base64}`;
+        }
+
+        document.getElementById(imgId).src = base64;
+        document.getElementById(imgId).style.display = 'block';
+        document.getElementById(phId).style.display = 'none';
+
+        if (target === 'insumo') tempFotoInsumo = base64;
+        if (target === 'bolsa') tempFotoBolsa = base64;
+      } catch (err) {}
+    } else {
+      const input = target === 'insumo' ? document.getElementById('inputFotoInsumo') : document.getElementById('inputFotoBolsa');
+      if (origem === 'CAMERA') input.setAttribute('capture', 'environment');
+      else input.removeAttribute('capture');
+      input.click();
+    }
+  }
+
+  function previewImage(e, imgId, phId, target) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        const maxDim = 800;
+        let w = img.width, h = img.height;
+        if (w > h && w > maxDim) { h *= maxDim / w; w = maxDim; }
+        else if (h > maxDim) { w *= maxDim / h; h = maxDim; }
+
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+        const base64 = canvas.toDataURL("image/jpeg", 0.8);
+
+        document.getElementById(imgId).src = base64;
+        document.getElementById(imgId).style.display = 'block';
+        document.getElementById(phId).style.display = 'none';
+
+        if (target === 'insumo') tempFotoInsumo = base64;
+        if (target === 'bolsa') tempFotoBolsa = base64;
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function alternarTipoInsumo() {
+    const tipo = document.getElementById('prodTipoMaterial').value;
+    const boxPeso = document.getElementById('boxPesoInsumo');
+    const boxQtd = document.getElementById('boxQtdAcessorio');
+    const lblPreco = document.getElementById('lblPrecoInsumo');
+
+    if (tipo === 'acessorio') {
+      boxPeso.style.display = 'none';
+      boxQtd.style.display = 'block';
+      lblPreco.innerText = 'Preço Unitário (R$)';
+    } else {
+      boxPeso.style.display = 'block';
+      boxQtd.style.display = 'none';
+      lblPreco.innerText = 'Preço Pago (R$)';
+    }
+  }
+
+  async function forcarSincronizacaoProfunda(tabelaAlvo) {
+    const defaultDbs = ["AkraiDB", "AkraiCrocheDB"];
+    let itensEncontrados = [];
+    let targets = defaultDbs;
+
+    if (indexedDB.databases) {
+      try {
+        const dbs = await indexedDB.databases();
+        const names = dbs.map(d => d.name).filter(Boolean);
+        targets = Array.from(new Set([...defaultDbs, ...names]));
+      } catch (e) {}
+    }
+
+    for (const name of targets) {
+      await new Promise((resolve) => {
+        const req = indexedDB.open(name);
+        req.onsuccess = async function(e) {
+          const localDb = e.target.result;
+          const stores = Array.from(localDb.objectStoreNames);
+          let targetStore = "";
+
+          if (tabelaAlvo === 'insumos') targetStore = stores.find(s => s === 'insumos' || s === 'produtos');
+          else if (tabelaAlvo === 'bolsas') targetStore = stores.find(s => s === 'bolsas' || s === 'modelos');
+          else if (tabelaAlvo === 'financeiro') targetStore = stores.find(s => s === 'financeiro' || s === 'vendas');
+
+          if (targetStore) {
+            try {
+              const tx = localDb.transaction([targetStore], "readonly");
+              const getAllReq = tx.objectStore(targetStore).getAll();
+              getAllReq.onsuccess = function() {
+                if (getAllReq.result && getAllReq.result.length > 0) {
+                  itensEncontrados.push(...getAllReq.result);
+                }
+                localDb.close();
+                resolve();
+              };
+              getAllReq.onerror = () => { localDb.close(); resolve(); };
+            } catch (errTx) {
+              localDb.close();
+              resolve();
+            }
+          } else {
+            localDb.close();
+            resolve();
+          }
+        };
+        req.onerror = () => resolve();
+      });
+    }
+
+    if (itensEncontrados.length === 0) {
+      alert("Nenhum dado legível localizado.");
+      return;
+    }
+
+    let payload = [];
+    if (tabelaAlvo === 'insumos') {
+      payload = itensEncontrados.map(item => {
+        const qtd = Number(item.qtdTotal !== undefined ? item.qtdTotal : (item.quantidade || item.pesoOriginal || item.peso || 0));
+        const preco = Number(item.precoTotal !== undefined ? item.precoTotal : (item.preco || item.precototal || 0));
+        const comp = String(item.composicao || item.prodComposicao || item.tipo || 'fio');
+        return {
+          id: Number(item.id) || Date.now() + Math.floor(Math.random() * 10000),
+          nome: String(item.nome || "Item"),
+          composicao: comp,
+          tipo: comp,
+          parcelas: 1,
+          precototal: preco,
+          precoTotal: preco,
+          qtdtotal: qtd,
+          qtdTotal: qtd,
+          pesooriginal: qtd,
+          pesoOriginal: qtd,
+          foto: item.foto || ""
+        };
+      });
+    } else if (tabelaAlvo === 'bolsas') {
+      payload = itensEncontrados.map(b => {
+        const custo = Number(b.custoBase || b.custoTotal || 0);
+        const preco = Number(b.precoFinal || b.precoSugerido || b.precoVenda || 0);
+        return {
+          id: Number(b.id) || Date.now() + Math.floor(Math.random() * 10000),
+          nome: String(b.nome || "Modelo"),
+          artesa: String(b.artesa || "Equipe"),
+          fios: typeof b.fios === 'string' ? b.fios : JSON.stringify(b.fios || []),
+          acessorios: typeof b.acessorios === 'string' ? b.acessorios : JSON.stringify(b.acessorios || []),
+          horas: Number(b.horas || 0),
+          custobase: custo,
+          custoBase: custo,
+          precofinal: preco,
+          precoFinal: preco,
+          margem: Number(b.margem || 35),
+          foto: b.foto || "",
+          vendida: !!b.vendida,
+          vendedora: b.vendedora || null,
+          valorvendareal: Number(b.valorVendaReal || preco)
+        };
+      });
+    } else if (tabelaAlvo === 'financeiro') {
+      payload = itensEncontrados.map(f => ({
+        id: Number(f.id) || Date.now() + Math.floor(Math.random() * 10000),
+        tipo: String(f.tipo === 'despesa' ? 'saida' : (f.tipo === 'receita' ? 'entrada' : f.tipo)),
+        titulo: String(f.titulo || f.descricao || "Movimento"),
+        valor: Number(f.valor || 0),
+        data: String(f.data || new Date().toLocaleDateString('pt-BR'))
+      }));
+    }
+
+    const { error } = await sbClient.from(tabelaAlvo).upsert(payload);
+    if (!error) {
+      alert("Sincronização concluída.");
+      if (tabelaAlvo === 'insumos') carregarInsumos();
+      if (tabelaAlvo === 'bolsas') carregarBolsas();
+      if (tabelaAlvo === 'financeiro') carregarFinanceiro();
+    }
+  }
+
+  async function salvarInsumo() {
+    const tipo = document.getElementById('prodTipoMaterial').value;
+    const nome = document.getElementById('prodNome').value.trim();
+    const precoTotal = parseFloat(document.getElementById('prodPrecoTotal').value) || 0;
+
+    if (!nome || precoTotal <= 0) return;
+
+    const qtdTotal = tipo === 'fio' 
+      ? (parseFloat(document.getElementById('prodQtdTotal').value) || 500) 
+      : (parseInt(document.getElementById('prodQtdAcessorio').value) || 1);
+    
+    const idItem = Date.now();
+    const valorDespesa = tipo === 'fio' ? precoTotal : (precoTotal * qtdTotal);
+
+    const novoItem = {
+      id: idItem,
+      nome: String(nome),
+      composicao: String(tipo),
+      tipo: String(tipo),
+      parcelas: 1,
+      precototal: Number(precoTotal),
+      precoTotal: Number(precoTotal),
+      qtdtotal: Number(qtdTotal),
+      qtdTotal: Number(qtdTotal),
+      pesooriginal: Number(qtdTotal),
+      pesoOriginal: Number(qtdTotal),
+      foto: tempFotoInsumo || ""
+    };
+
+    const novoLancamento = {
+      id: idItem,
+      tipo: "saida",
+      titulo: `Compra: ${nome}`,
+      valor: Number(valorDespesa),
+      data: new Date().toLocaleDateString('pt-BR')
+    };
+
+    await sbClient.from("insumos").insert([novoItem]);
+    await sbClient.from("financeiro").insert([novoLancamento]);
+
+    try {
+      if (db) {
+        const tx = db.transaction(["insumos", "financeiro"], "readwrite");
+        tx.objectStore("insumos").put(novoItem);
+        tx.objectStore("financeiro").put({ ...novoLancamento, dataIso: getHojeFormatadoIso() });
+      }
+    } catch (e) {}
+
+    document.getElementById('prodNome').value = "";
+    document.getElementById('prodPrecoTotal').value = "";
+    document.getElementById('prodQtdTotal').value = "";
+    document.getElementById('prevFotoInsumo').style.display = "none";
+    document.getElementById('phFotoInsumo').style.display = "block";
+    tempFotoInsumo = "";
+
+    await carregarInsumos();
+    await carregarFinanceiro();
+  }
+
+  async function carregarInsumos(callback) {
+    const { data: itens } = await sbClient.from("insumos").select("*").order("id", { ascending: false });
+
+    if (itens && itens.length >= 0) {
+      insumosCache = itens;
+    } else if (db) {
+      const tx = db.transaction(["insumos"], "readonly");
+      const req = tx.objectStore("insumos").getAll();
+      req.onsuccess = () => { insumosCache = req.result || []; };
+    }
+
+    const lista = document.getElementById('listaProdutos');
+    lista.innerHTML = insumosCache.length ? "" : '<p style="font-size:12px; color:#888; text-align:center;">Vazio.</p>';
+
+    insumosCache.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'item-card';
+      const foto = (p.foto && p.foto.length > 50) ? p.foto : SVG_DEFAULT_ASSET;
+      const isAcessorio = isItemAcessorio(p);
+      const precoNum = getPrecoItem(p);
+      const qtdNum = p.qtdTotal !== undefined ? p.qtdTotal : (p.qtdtotal !== undefined ? p.qtdtotal : (p.peso || 1));
+
+      let detalheTexto = isAcessorio
+        ? `<p>R$ ${precoNum.toFixed(2)}/un • <strong>${qtdNum} un</strong></p>`
+        : `<p>R$ ${precoNum.toFixed(2)} • <strong>${qtdNum}g</strong>${qtdNum <= 0 ? ' <span style="color:var(--red-expense);font-weight:700;">(Esgotado)</span>' : ''}</p>`;
+
+      card.innerHTML = `
+        <div class="card-header-row">
+          <img src="${foto}" class="item-thumb" alt="Preview">
+          <div class="item-info">
+            <h4>${p.nome}</h4>
+            ${detalheTexto}
+          </div>
+          <button class="btn-action btn-action-del" onclick="removerInsumo(${p.id})">✕</button>
+        </div>
+      `;
+      lista.appendChild(card);
+    });
+
+    if (typeof callback === 'function') callback();
+  }
+
+  async function removerInsumo(id) {
+    if (!confirm("Remover item?")) return;
+    await sbClient.from("insumos").delete().eq("id", id);
+    try {
+      if (db) {
+        const tx = db.transaction(["insumos"], "readwrite");
+        tx.objectStore("insumos").delete(id);
+      }
+    } catch(e) {}
+    carregarInsumos();
+  }
+
+  function adicionarLinhaFio() {
+    const container = document.getElementById('containerLinhasFios');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row item-linha-fio';
+
+    const fios = insumosCache.filter(i => !isItemAcessorio(i));
+    let opts = '<option value="">Selecione...</option>';
+    fios.forEach(f => {
+      const precoNum = getPrecoItem(f);
+      const pesoRef = f.pesoOriginal || f.pesooriginal || f.qtdTotal || f.qtdtotal || 500;
+      const custoG = (precoNum / pesoRef).toFixed(4);
+      const saldoG = f.qtdTotal !== undefined ? f.qtdTotal : (f.qtdtotal || 0);
+      opts += `<option value="${f.id}" data-custog="${custoG}">${f.nome} (${saldoG}g)</option>`;
+    });
+
+    div.innerHTML = `
+      <select class="sel-fio" style="flex:2; font-size:12px; padding:7px;" onchange="calcularBolsa()">${opts}</select>
+      <input type="number" class="peso-fio" placeholder="g" style="flex:1; font-size:12px; padding:7px;" oninput="calcularBolsa()">
+      <button type="button" class="btn-action btn-action-del" onclick="this.parentElement.remove(); calcularBolsa();" style="flex:0 0 26px; height:34px;">✕</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function adicionarLinhaAcessorio() {
+    const container = document.getElementById('containerLinhasAcessorios');
+    const div = document.createElement('div');
+    div.className = 'dynamic-row item-linha-acessorio';
+
+    const acessorios = insumosCache.filter(i => isItemAcessorio(i));
+    let opts = '<option value="">Selecione...</option>';
+    acessorios.forEach(a => {
+      const precoNum = getPrecoItem(a);
+      opts += `<option value="${a.id}" data-preco="${precoNum}">${a.nome} (R$ ${precoNum.toFixed(2)})</option>`;
+    });
+
+    div.innerHTML = `
+      <select class="sel-acessorio" style="flex:2; font-size:12px; padding:7px;" onchange="calcularBolsa()">${opts}</select>
+      <input type="number" class="qtd-acessorio" value="1" min="1" placeholder="un" style="flex:1; font-size:12px; padding:7px;" oninput="calcularBolsa()">
+      <button type="button" class="btn-action btn-action-del" onclick="this.parentElement.remove(); calcularBolsa();" style="flex:0 0 26px; height:34px;">✕</button>
+    `;
+    container.appendChild(div);
+  }
+
+  function calcularBolsa() {
+    let custoTotalFios = 0;
+    const listaFiosUsados = [];
+    document.querySelectorAll('.item-linha-fio').forEach(el => {
+      const sel = el.querySelector('.sel-fio');
+      const opt = sel.options[sel.selectedIndex];
+      const peso = parseFloat(el.querySelector('.peso-fio').value) || 0;
+      if (opt && opt.value && peso > 0) {
+        const custoG = parseFloat(opt.dataset.custog) || 0;
+        custoTotalFios += custoG * peso;
+        listaFiosUsados.push({ id: parseInt(opt.value), peso, nome: opt.text.split(' (')[0] });
+      }
+    });
+
+    let custoTotalAcessorios = 0;
+    const listaAcessoriosUsados = [];
+    document.querySelectorAll('.item-linha-acessorio').forEach(el => {
+      const sel = el.querySelector('.sel-acessorio');
+      const opt = sel.options[sel.selectedIndex];
+      const qtd = parseInt(el.querySelector('.qtd-acessorio').value) || 0;
+      if (opt && opt.value && qtd > 0) {
+        const precoUnit = parseFloat(opt.dataset.preco) || 0;
+        custoTotalAcessorios += precoUnit * qtd;
+        listaAcessoriosUsados.push({ id: parseInt(opt.value), qtd, nome: opt.text.split(' (')[0] });
+      }
+    });
+
+    const valorHora = parseFloat(document.getElementById('bolsaValorHora').value) || 0;
+    const horas = parseFloat(document.getElementById('bolsaHoras').value) || 0;
+    const margem = parseFloat(document.getElementById('bolsaMargem').value) || 0;
+
+    const maoDeObra = valorHora * horas;
+    const custoBase = custoTotalFios + custoTotalAcessorios + maoDeObra;
+    const precoFinal = custoBase * (1 + (margem / 100));
+
+    const fmt = val => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    document.getElementById('outFio').innerText = fmt(custoTotalFios);
+    document.getElementById('outAcessorios').innerText = fmt(custoTotalAcessorios);
+    document.getElementById('outMao').innerText = fmt(maoDeObra);
+    document.getElementById('outCustoBase').innerText = fmt(custoBase);
+    document.getElementById('outPrecoVenda').innerText = fmt(precoFinal);
+
+    ultimoCalculo = {
+      nome: document.getElementById('bolsaNome').value.trim() || "Modelo",
+      artesa: document.getElementById('bolsaArtesa').value.trim() || "",
+      fios: listaFiosUsados,
+      acessorios: listaAcessoriosUsados,
+      horas,
+      custoBase,
+      precoFinal,
+      margem,
+      vendida: false,
+      dataCriacao: new Date().toLocaleDateString('pt-BR')
+    };
+
+    document.getElementById('resultadoBolsa').style.display = 'block';
+  }
+
+  async function salvarBolsaNoCatalogo() {
+    if (!ultimoCalculo) return;
+
+    const novaBolsa = {
+      id: Date.now(),
+      nome: String(ultimoCalculo.nome),
+      artesa: String(ultimoCalculo.artesa || "Akrai"),
+      fios: JSON.stringify(ultimoCalculo.fios),
+      acessorios: JSON.stringify(ultimoCalculo.acessorios),
+      horas: Number(ultimoCalculo.horas),
+      custobase: Number(ultimoCalculo.custoBase),
+      custoBase: Number(ultimoCalculo.custoBase),
+      precofinal: Number(ultimoCalculo.precoFinal),
+      precoFinal: Number(ultimoCalculo.precoFinal),
+      margem: Number(ultimoCalculo.margem),
+      foto: tempFotoBolsa || "",
+      vendida: false
+    };
+
+    const { error } = await sbClient.from("bolsas").insert([novaBolsa]);
+    if (error) return;
+
+    for (const fio of ultimoCalculo.fios) {
+      const itemFio = insumosCache.find(i => i.id === fio.id);
+      if (itemFio) {
+        const saldoAtual = itemFio.qtdTotal !== undefined ? itemFio.qtdTotal : (itemFio.qtdtotal || 0);
+        const novoSaldo = Math.max(0, Math.round((saldoAtual - fio.peso) * 10) / 10);
+        await sbClient.from("insumos").update({ qtdTotal: novoSaldo, qtdtotal: novoSaldo }).eq("id", fio.id);
+      }
+    }
+
+    for (const acess of ultimoCalculo.acessorios) {
+      const itemAcess = insumosCache.find(i => i.id === acess.id);
+      if (itemAcess) {
+        const saldoAtual = itemAcess.qtdTotal !== undefined ? itemAcess.qtdTotal : (itemAcess.qtdtotal || 1);
+        const novoSaldo = Math.max(0, saldoAtual - acess.qtd);
+        await sbClient.from("insumos").update({ qtdTotal: novoSaldo, qtdtotal: novoSaldo }).eq("id", acess.id);
+      }
+    }
+
+    document.getElementById('bolsaNome').value = "";
+    document.getElementById('bolsaArtesa').value = "";
+    document.getElementById('bolsaHoras').value = "";
+    document.getElementById('containerLinhasFios').innerHTML = "";
+    document.getElementById('containerLinhasAcessorios').innerHTML = "";
+    document.getElementById('prevFotoBolsa').style.display = "none";
+    document.getElementById('phFotoBolsa').style.display = "block";
+    document.getElementById('resultadoBolsa').style.display = "none";
+    tempFotoBolsa = "";
+    ultimoCalculo = null;
+    await carregarInsumos();
+    switchTab('catalogo');
+  }
+
+  async function carregarBolsas() {
+    const { data: bolsas } = await sbClient.from("bolsas").select("*").order("id", { ascending: false });
+    const lista = document.getElementById('listaBolsas');
+
+    if (!bolsas || bolsas.length === 0) {
+      lista.innerHTML = '<p style="font-size:12px; color:#888; text-align:center;">Vazio.</p>';
+      return;
+    }
+
+    lista.innerHTML = "";
+
+    bolsas.forEach(b => {
+      let listaFios = [];
+      try {
+        if (typeof b.fios === 'string') listaFios = JSON.parse(b.fios);
+        else if (Array.isArray(b.fios)) listaFios = b.fios;
+      } catch (e) {}
+
+      let descFios = listaFios.length ? listaFios.map(f => `${f.nome} (${f.peso}g)`).join(', ') : (b.fioNome || '');
+
+      const card = document.createElement('div');
+      card.className = `item-card ${b.vendida ? 'vendido' : ''}`;
+      const foto = (b.foto && b.foto.length > 50) ? b.foto : SVG_DEFAULT_PRODUCT;
+
+      const badgeVenda = b.vendida ? `<span class="badge-vendida">VENDIDA</span>` : '';
+      const botaoVenda = !b.vendida ? `<button class="btn-action btn-action-sell" onclick='abrirModalVenda(${JSON.stringify(b)})'>💰 Vender</button>` : '';
+
+      card.innerHTML = `
+        <div class="card-header-row">
+          <img src="${foto}" class="item-thumb" alt="Preview">
+          <div class="item-info">
+            <h4>${b.nome} ${badgeVenda}</h4>
+            <p>Artesã: <strong>${b.artesa || '-'}</strong></p>
+            ${b.vendedora ? `<p style="color:var(--green-income)">Saída por: <strong>${b.vendedora}</strong></p>` : ''}
+            <p style="font-size:11px; color:#8C7B6D;">${descFios}</p>
+            <strong style="color:var(--accent-berry); font-size:13.5px;">R$ ${Number(b.precoFinal || b.precofinal).toFixed(2).replace('.', ',')}</strong>
+          </div>
+        </div>
+        <div class="card-actions">
+          ${botaoVenda}
+          <button class="btn-action btn-action-wpp" onclick='compartilharWhatsApp(${JSON.stringify(b)})'>💬 WhatsApp</button>
+          <button class="btn-action btn-action-del" onclick="removerBolsa(${b.id})">✕</button>
+        </div>
+      `;
+      lista.appendChild(card);
+    });
+  }
+
+  async function removerBolsa(id) {
+    if (!confirm("Remover modelo?")) return;
+    await sbClient.from("bolsas").delete().eq("id", id);
+    carregarBolsas();
+  }
+
+  function abrirModalVenda(bolsa) {
+    bolsaParaVender = bolsa;
+    document.getElementById('modalVendaDesc').innerText = `Item: ${bolsa.nome}`;
+    document.getElementById('vendaVendedora').value = '';
+    document.getElementById('vendaValorEfetivo').value = Number(bolsa.precoFinal || bolsa.precofinal).toFixed(2);
+    document.getElementById('modalVenda').style.display = 'flex';
+  }
+
+  function fecharModalVenda(e) {
+    if (e.target.id === 'modalVenda') document.getElementById('modalVenda').style.display = 'none';
+  }
+
+  async function confirmarVendaBolsa() {
+    if (!bolsaParaVender) return;
+    const vendedora = document.getElementById('vendaVendedora').value.trim();
+    const valorEfetivo = parseFloat(document.getElementById('vendaValorEfetivo').value) || 0;
+
+    if (!vendedora) return;
+
+    await sbClient.from("bolsas").update({
+      vendida: true,
+      vendedora: vendedora,
+      valorVendaReal: valorEfetivo,
+      valorvendareal: valorEfetivo
+    }).eq("id", bolsaParaVender.id);
+
+    const novoLancamento = {
+      id: Date.now(),
+      tipo: "entrada",
+      titulo: `Venda: ${bolsaParaVender.nome} (${vendedora})`,
+      valor: valorEfetivo,
+      data: new Date().toLocaleDateString('pt-BR')
+    };
+
+    await sbClient.from("financeiro").insert([novoLancamento]);
+
+    document.getElementById('modalVenda').style.display = 'none';
+    bolsaParaVender = null;
+    await carregarBolsas();
+    await carregarFinanceiro();
+  }
+
+  async function carregarFinanceiro() {
+    const { data: lancamentosRes } = await sbClient.from("financeiro").select("*").order("id", { ascending: false });
+    let lancamentos = lancamentosRes || [];
+
+    const dtInicio = document.getElementById('filtroDataInicio').value;
+    const dtFim = document.getElementById('filtroDataFim').value;
+
+    if (dtInicio || dtFim) {
+      lancamentos = lancamentos.filter(l => {
+        const itemIso = converterParaIso(l.data);
+        if (!itemIso) return true;
+        if (dtInicio && itemIso < dtInicio) return false;
+        if (dtFim && itemIso > dtFim) return false;
+        return true;
+      });
+    }
+
+    const lista = document.getElementById('listaFinanceiro');
+    lista.innerHTML = lancamentos.length ? "" : '<p style="font-size:12px; color:#888; text-align:center;">Sem lançamentos.</p>';
+
+    let entradas = 0;
+    let saidas = 0;
+
+    lancamentos.forEach(l => {
+      const v = Number(l.valor);
+      if (l.tipo === 'entrada') entradas += v;
+      else saidas += v;
+
+      const isEntrada = l.tipo === 'entrada';
+      const cor = isEntrada ? 'var(--green-income)' : 'var(--red-expense)';
+      const sinal = isEntrada ? '+ ' : '- ';
+
+      const item = document.createElement('div');
+      item.className = 'fin-item';
+      item.innerHTML = `
+        <div>
+          <div class="fin-item-title">${l.titulo}</div>
+          <div class="fin-item-date">${l.data}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <strong style="color:${cor};">${sinal}R$ ${v.toFixed(2).replace('.', ',')}</strong>
+          <button onclick="removerItemFinanceiro(${l.id})" style="background:none; border:none; color:#C62828; cursor:pointer; font-size:14px;">✕</button>
+        </div>
+      `;
+      lista.appendChild(item);
+    });
+
+    const saldo = entradas - saidas;
+    const fmt = val => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    document.getElementById('finTotalEntradas').innerText = fmt(entradas);
+    document.getElementById('finTotalSaidas').innerText = fmt(saidas);
+
+    const elSaldo = document.getElementById('finSaldoLiquido');
+    elSaldo.innerText = fmt(saldo);
+    elSaldo.style.color = saldo >= 0 ? 'var(--green-income)' : 'var(--red-expense)';
+  }
+
+  function limparFiltroFinanceiro() {
+    document.getElementById('filtroDataInicio').value = '';
+    document.getElementById('filtroDataFim').value = '';
+    carregarFinanceiro();
+  }
+
+  async function removerItemFinanceiro(id) {
+    if (!confirm("Excluir transação?")) return;
+    await sbClient.from("financeiro").delete().eq("id", id);
+    carregarFinanceiro();
+  }
+
+  async function resetarFinanceiro() {
+    if (!confirm("Zerar caixa contábil?")) return;
+    await sbClient.from("financeiro").delete().neq("id", 0);
+    carregarFinanceiro();
+  }
+
+  async function abrirModalExtrato() {
+    const { data: lancamentosRes } = await sbClient.from("financeiro").select("*").order("id", { ascending: false });
+    let lancamentos = lancamentosRes || [];
+
+    const dtInicio = document.getElementById('filtroDataInicio').value;
+    const dtFim = document.getElementById('filtroDataFim').value;
+
+    if (dtInicio || dtFim) {
+      lancamentos = lancamentos.filter(l => {
+        const itemIso = converterParaIso(l.data);
+        if (!itemIso) return true;
+        if (dtInicio && itemIso < dtInicio) return false;
+        if (dtFim && itemIso > dtFim) return false;
+        return true;
+      });
+    }
+
+    if (lancamentos.length === 0) return;
+
+    let entradas = 0, saidas = 0;
+    let linhasTabelaHtml = '';
+
+    lancamentos.forEach(l => {
+      const v = Number(l.valor);
+      if (l.tipo === 'entrada') entradas += v;
+      else saidas += v;
+
+      const isEntrada = l.tipo === 'entrada';
+      linhasTabelaHtml += `
+        <tr style="border-bottom: 1px solid #ddd;">
+          <td style="padding: 6px 2px;">${l.data}</td>
+          <td style="padding: 6px 2px;">${l.titulo}</td>
+          <td style="padding: 6px 2px; text-align: center; color: ${isEntrada ? '#2E7D32' : '#C62828'}; font-weight: bold;">${l.tipo.toUpperCase()}</td>
+          <td style="padding: 6px 2px; text-align: right;">R$ ${v.toFixed(2).replace('.', ',')}</td>
+        </tr>
+      `;
+    });
+
+    const saldo = entradas - saidas;
+    const periodoTexto = `Período: ${dtInicio ? dtInicio.split('-').reverse().join('/') : 'Início'} até ${dtFim ? dtFim.split('-').reverse().join('/') : 'Hoje'}`;
+
+    document.getElementById('extratoModalPeriodo').innerText = periodoTexto;
+
+    extratoDadosPDF = { lancamentos, entradas, saidas, saldo, periodo: periodoTexto };
+
+    document.getElementById('conteudoExtratoScroll').innerHTML = `
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1.5px solid var(--cord-gold); font-size:11px;">
+            <th style="text-align:left; padding:4px;">Data</th>
+            <th style="text-align:left; padding:4px;">Descrição</th>
+            <th style="text-align:center; padding:4px;">Tipo</th>
+            <th style="text-align:right; padding:4px;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>${linhasTabelaHtml}</tbody>
+      </table>
+      <div style="border-top:1.5px solid var(--cord-gold); margin-top:10px; padding-top:6px; text-align:right; font-size:12px;">
+        <div>Receitas: <strong style="color:var(--green-income);">R$ ${entradas.toFixed(2).replace('.', ',')}</strong></div>
+        <div>Despesas: <strong style="color:var(--red-expense);">R$ ${saidas.toFixed(2).replace('.', ',')}</strong></div>
+        <div style="font-size:13px; margin-top:2px;">Saldo: <strong style="color:${saldo>=0?'var(--green-income)':'var(--red-expense)'};">R$ ${saldo.toFixed(2).replace('.', ',')}</strong></div>
+      </div>
+    `;
+
+    document.getElementById('modalVisualizarExtrato').style.display = 'flex';
+  }
+
+  function fecharModalExtrato(e) {
+    if (e.target.id === 'modalVisualizarExtrato') document.getElementById('modalVisualizarExtrato').style.display = 'none';
+  }
+
+  async function gerarECompartilharPDF() {
+    if (!extratoDadosPDF || extratoDadosPDF.lancamentos.length === 0) return;
+
+    try {
+      const { jsPDF } = window.jspdf || {};
+      if (!jsPDF) return;
+
+      const doc = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(74, 53, 37);
+      doc.text("AKRAI", 297.5, 45, { align: "center" });
+
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(122, 105, 92);
+      doc.text("Extrato Financeiro", 297.5, 65, { align: "center" });
+
+      doc.setFontSize(10);
+      doc.setTextColor(140, 123, 109);
+      doc.text(extratoDadosPDF.periodo, 297.5, 82, { align: "center" });
+
+      doc.setDrawColor(197, 168, 128);
+      doc.setLineWidth(1.5);
+      doc.line(40, 95, 555, 95);
+
+      let y = 115;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(74, 53, 37);
+      doc.text("Data", 45, y);
+      doc.text("Descrição", 125, y);
+      doc.text("Tipo", 410, y);
+      doc.text("Valor", 550, y, { align: "right" });
+
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.8);
+      doc.line(40, y + 6, 555, y + 6);
+      y += 22;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+
+      extratoDadosPDF.lancamentos.forEach((l) => {
+        if (y > 750) {
+          doc.addPage();
+          y = 50;
+        }
+
+        const isEntrada = l.tipo === 'entrada';
+        doc.setTextColor(60, 60, 60);
+        doc.text(l.data || "-", 45, y);
+
+        const tituloCortado = doc.splitTextToSize(l.titulo, 270);
+        doc.text(tituloCortado, 125, y);
+
+        if (isEntrada) {
+          doc.setTextColor(46, 125, 50);
+          doc.text("RECEITA", 410, y);
+          doc.text(`+ R$ ${Number(l.valor).toFixed(2).replace('.', ',')}`, 550, y, { align: "right" });
+        } else {
+          doc.setTextColor(198, 40, 40);
+          doc.text("DESPESA", 410, y);
+          doc.text(`- R$ ${Number(l.valor).toFixed(2).replace('.', ',')}`, 550, y, { align: "right" });
+        }
+
+        const linhasGastas = Array.isArray(tituloCortado) ? tituloCortado.length : 1;
+        y += Math.max(18, linhasGastas * 12);
+        
+        doc.setDrawColor(240, 240, 240);
+        doc.line(40, y - 6, 555, y - 6);
+      });
+
+      y += 10;
+      if (y > 720) { doc.addPage(); y = 50; }
+
+      doc.setDrawColor(197, 168, 128);
+      doc.setLineWidth(1.5);
+      doc.line(320, y, 555, y);
+      y += 18;
+
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(46, 125, 50);
+      doc.text(`Total Receitas:`, 330, y);
+      doc.text(`R$ ${extratoDadosPDF.entradas.toFixed(2).replace('.', ',')}`, 550, y, { align: "right" });
+      y += 16;
+
+      doc.setTextColor(198, 40, 40);
+      doc.text(`Total Despesas:`, 330, y);
+      doc.text(`R$ ${extratoDadosPDF.saidas.toFixed(2).replace('.', ',')}`, 550, y, { align: "right" });
+      y += 18;
+
+      doc.setFontSize(12);
+      doc.setTextColor(extratoDadosPDF.saldo >= 0 ? 46 : 198, extratoDadosPDF.saldo >= 0 ? 125 : 40, extratoDadosPDF.saldo >= 0 ? 50 : 40);
+      doc.text(`Saldo:`, 330, y);
+      doc.text(`R$ ${extratoDadosPDF.saldo.toFixed(2).replace('.', ',')}`, 550, y, { align: "right" });
+
+      const pdfDataUri = doc.output('datauristring');
+      const pdfBase64 = pdfDataUri.split(',')[1];
+      const nomeArquivo = `extrato_${Date.now()}.pdf`;
+
+      const plugins = window.Capacitor?.Plugins;
+      if (plugins?.Filesystem?.writeFile) {
+        try {
+          const directoryVal = plugins.Filesystem.Directory?.Cache || "CACHE";
+          const resArquivo = await plugins.Filesystem.writeFile({
+            path: nomeArquivo,
+            data: pdfBase64,
+            directory: directoryVal
+          });
+
+          if (plugins?.Share?.share) {
+            await plugins.Share.share({
+              title: 'Extrato',
+              files: [resArquivo.uri]
+            });
+            return;
+          }
+        } catch (fsErr) {}
+      }
+
+      doc.save(nomeArquivo);
+    } catch (err) {}
+  }
+
+  async function compartilharWhatsApp(bolsa) {
+    let linhasFios = "";
+    try {
+      let lista = [];
+      if (typeof bolsa.fios === 'string') lista = JSON.parse(bolsa.fios);
+      else if (Array.isArray(bolsa.fios)) lista = bolsa.fios;
+      if (lista.length) linhasFios = lista.map(f => `• ${f.nome}: ${f.peso}g`).join('\n');
+    } catch (e) {}
+
+    const textoFinal = [
+      "✨ *AKRAI* ✨",
+      "",
+      `🛍️ *Modelo:* ${bolsa.nome}`,
+      linhasFios ? `🧶 *Materiais:*\n${linhasFios}` : "",
+      `💰 *Investimento:* R$ ${Number(bolsa.precoFinal || bolsa.precofinal).toFixed(2).replace('.', ',')}`,
+      "",
+      "🧼 *Cuidados:*",
+      "• Lavar à mão com sabão neutro.",
+      "• Secar na horizontal à sombra.",
+      "• Limpar metais com flanela seca.",
+      "",
+      "_Produção artesanal manual._"
+    ].filter(Boolean).join("\n");
+
+    const isCapacitor = window.Capacitor && window.Capacitor.isNativePlatform();
+    const plugins = window.Capacitor?.Plugins;
+
+    if (isCapacitor && plugins?.Share && plugins?.Filesystem && bolsa.foto && bolsa.foto.startsWith('data:image')) {
+      try {
+        const base64Limpo = bolsa.foto.split(',')[1] || bolsa.foto;
+        const nomeArquivo = `item_${bolsa.id || Date.now()}.jpg`;
+        const directoryVal = plugins.Filesystem.Directory?.Cache || "CACHE";
+
+        const arquivoSalvo = await plugins.Filesystem.writeFile({
+          path: nomeArquivo,
+          data: base64Limpo,
+          directory: directoryVal
+        });
+
+        await plugins.Share.share({
+          title: bolsa.nome,
+          text: textoFinal,
+          files: [arquivoSalvo.uri]
+        });
+        return;
+      } catch (err) {}
+    }
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoFinal)}`;
+    window.open(url, '_blank');
+  }
+
+  verificarSessao();
+</script>
+
+</body>
+</html>
